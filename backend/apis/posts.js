@@ -24,6 +24,36 @@ export const getPost = async (req, res) => {
     }
 }
 
+export const getNextPosts = async (req, res) => {
+    const { id } = req.params;
+    let { count } = req.params;
+
+    if (!count) count = 1;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid post id" });
+    try {
+        const nextPosts = await Post.find({ _id: { $gt: id } }).sort({ _id: 1 }).limit(count);
+        res.json(nextPosts);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+export const getPrevPosts = async (req, res) => {
+    const { id } = req.params;
+    let { count } = req.params;
+
+    if (!count) count = 1;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid post id" });
+    try {
+        const nextPosts = await Post.find({ _id: { $lt: id } }).sort({ _id: -1 }).limit(count);
+        res.json(nextPosts);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
 export const createPost = async (req, res) => {
     if (!req.user) return res.status(401).send({ success: false, message: "Login required" });
 
