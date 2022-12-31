@@ -8,7 +8,6 @@ import {
   CircularProgress,
   IconButton,
   Card,
-  CardHeader,
   CardMedia,
   CardContent,
   CardActions,
@@ -20,6 +19,7 @@ import useLikePostMutation from "../hooks/useLikePostMutation";
 import useFavoritePostMutation from '../hooks/useFavoritePostMutation';
 import usePost from "../hooks/usePost";
 import useUser from '../hooks/useUser';
+import PostDetailNav from "./PostDetailNav";
 
 function PostDetail() {
   const { postId } = useParams();
@@ -50,7 +50,8 @@ function PostDetail() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
-      <Paper>
+      <PostDetailNav post={post}/>
+      <Paper sx={{ mt: 2 }}>
         <Card>
           <CardMedia>
             <Stack sx={{ p: 0, bgcolor: 'black', textAlign: "center" }}>
