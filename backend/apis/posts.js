@@ -54,6 +54,18 @@ export const getPrevPosts = async (req, res) => {
     }
 }
 
+export const getFavoritePosts = async (req, res) => {
+    if (!req.user) return res.status(401).send({ success: false, message: "Login required" });
+
+    try {
+        const currentUser = await User.findById(req.user.userId).populate("favoritePosts");
+        res.json(currentUser.favoritePosts);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
 export const createPost = async (req, res) => {
     if (!req.user) return res.status(401).send({ success: false, message: "Login required" });
 
