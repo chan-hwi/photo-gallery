@@ -130,12 +130,17 @@ export const toggleFavoritePost = async (req, res) => {
     try {
         const { id } = req.params;
         const currentPost = await Post.findById(id);
-        if (currentPost.favorites.find(userId => userId.equals(req.user.userId))) 
+        const currentUser = await User.findById(req.user.userId);
+        if (currentPost.favorites.find(userId => userId.equals(req.user.userId))) {
             currentPost.favorites = currentPost.favorites.filter(userId => !userId.equals(req.user.userId));
-        else 
+            currentUser.favoritePosts = currentUser.favoritePosts.filter(postId => !postId.equals(id));
+        } else { 
             currentPost.favorites.push(req.user.userId);
-        
+            currentUser.favoritePosts.push(id);
+        }
+
         await currentPost.save();
+        await currentUser.save();
         res.sendStatus(204);
     } catch (e) {
         console.log(e);

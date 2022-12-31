@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  favoritePosts: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Post"
+  },
   refreshTokens: {
     type: [String],
     default: [],
