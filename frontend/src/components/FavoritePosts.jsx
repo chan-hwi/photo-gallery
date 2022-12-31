@@ -1,9 +1,9 @@
 import { CircularProgress, Box } from '@mui/material'
 import PostsLayout from './PostsLayout';
-import usePosts from '../hooks/usePosts';
+import useFavoritePosts from '../hooks/useFavoritePosts';
 
-function Posts() {
-  const { posts, queryParams } = usePosts();
+function FavoritePosts() {
+  const { posts, queryParams } = useFavoritePosts();
 
   if (queryParams?.isLoading) return (
     <Box display='flex' justifyContent='center' alignItems='center' mt={6}>
@@ -16,4 +16,4 @@ function Posts() {
   )
 }
 
-export default Posts
+export default FavoritePosts;

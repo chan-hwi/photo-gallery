@@ -16,7 +16,7 @@ function Sidebar() {
             </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-            <ListItemButton component={Link} to='/favorite'>
+            <ListItemButton component={Link} to='/posts/favorites'>
                 <ListItemIcon><Star /></ListItemIcon>
                 <ListItemText>즐겨 찾기한 이미지</ListItemText>
             </ListItemButton>
