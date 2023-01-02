@@ -5,11 +5,9 @@ import LandingPage from './components/LandingPage';
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import NotFound from "./components/NotFound";
-import useUser from './hooks/useUser';
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
-  const { user } = useUser();
-
   return (
     <Container>
       <Routes>
@@ -18,8 +16,10 @@ function App() {
             <Navbar />
             <Routes>
               <Route path="/*" element={<LandingPage />} />
-              <Route path="/login" element={!user ? <LoginForm /> : <Navigate to='/' />} />
-              <Route path="/register" element={!user ? <RegisterForm /> : <Navigate to='/' /> }/>
+              <Route element={<PrivateRoute noAuth />}>
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/register" element={<RegisterForm />} />
+              </Route>
             </Routes>
           </>
         } />
