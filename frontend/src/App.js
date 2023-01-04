@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Container } from "@mui/material";
 import Navbar from "./components/Navbar";
 import LandingPage from './components/LandingPage';

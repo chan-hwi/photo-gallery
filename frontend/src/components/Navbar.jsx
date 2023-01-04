@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext } from "react";
+import { useState, useCallback } from "react";
 import {
   AppBar,
   Toolbar,
@@ -7,10 +7,12 @@ import {
   Button,
   Box,
   Avatar,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
-import { Login } from "@mui/icons-material";
+import { colors } from "@mui/material";
+import { Login, Search } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { UserContext } from "../providers/UserProvider";
 import ProfileMenu from "./ProfileMenu";
 import useUser from '../hooks/useUser';
 
@@ -20,7 +22,6 @@ const btnLink = {
 };
 
 function Navbar() {
-  // const { state } = useContext(UserContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const { user } = useUser();
   const profile = user?.profile;
@@ -47,7 +48,9 @@ function Navbar() {
             웹 저장소
           </Typography>
         </Button>
-        <Stack direction="row" spacing={2}>
+        <Box sx={{ flexGrow: 1 }} />
+        
+        {/* <Stack direction="row" spacing={2}>
           <Button variant="text">
             <Typography variant="subtitle1" color="white">
               이미지
@@ -63,8 +66,7 @@ function Navbar() {
               토픽
             </Typography>
           </Button>
-        </Stack>
-        <Box sx={{ flexGrow: 1 }} />
+        </Stack> */}
         <Button
           variant="text"
           color="inherit"
