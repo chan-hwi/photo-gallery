@@ -46,11 +46,14 @@ export const createComment = async (req, res) => {
 export const updateComment = async (req, res) => {
     const { id } = req.params;
     const { comment } = req.body;
+    if (!req.user) return res.status(403).send({ success: false, message: "Login required" });
     
     try {
         if (!mongoose.Schema.Types.ObjectId(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
-        await Comment.findByIdAndUpdate(id, comment);
-        return res.sendStatus(204);
+        const currentComment = await Comment.findById(id);
+        if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
+        await currentComment.update(comment);
+        res.sendStatus(204);
     } catch (e) {
         console.log(e);
         res.status(500).send("Internal Server Error");
@@ -59,11 +62,14 @@ export const updateComment = async (req, res) => {
 
 export const deleteComment = async (req, res) => {
     const { id } = req.params;
+    if (!req.user) return res.status(403).send({ success: false, message: "Login required" });
     
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
-        await Comment.findByIdAndDelete(id);
-        return res.sendStatus(204);
+        const currentComment = await Comment.findById(id);
+        if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
+        await currentComment.delete();
+        res.sendStatus(204);
     } catch (e) {
         console.log(e);
         res.status(500).send("Internal Server Error");
