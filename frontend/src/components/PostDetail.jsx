@@ -20,6 +20,7 @@ import useFavoritePostMutation from '../hooks/useFavoritePostMutation';
 import usePost from "../hooks/usePost";
 import useUser from '../hooks/useUser';
 import PostDetailNav from "./PostDetailNav";
+import Comments from './Comments';
 
 function PostDetail() {
   const { postId } = useParams();
@@ -87,6 +88,7 @@ function PostDetail() {
           <Divider />
         </Card>
       </Paper>
+      <Comments />
     </Container>
   );
 }

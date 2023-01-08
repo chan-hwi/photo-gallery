@@ -1,7 +1,7 @@
 import React from 'react'
 import { axiosInstance as api } from '../apis'; 
 import { Link } from 'react-router-dom';
-import { Paper, Container, Grid, Stack } from '@mui/material';
+import { Paper, Container, Grid } from '@mui/material';
 import { useQuery } from 'react-query';
 
 function PostDetailNav({ post }) {
