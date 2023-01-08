@@ -61,7 +61,7 @@ export const deleteComment = async (req, res) => {
     const { id } = req.params;
     
     try {
-        if (!mongoose.Schema.Types.ObjectId(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
+        if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
         await Comment.findByIdAndDelete(id);
         return res.sendStatus(204);
     } catch (e) {

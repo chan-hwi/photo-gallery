@@ -14,11 +14,58 @@ import {
   Divider,
 } from "@mui/material";
 import { Reply, Edit, Delete } from "@mui/icons-material";
+import { useParams } from "react-router-dom";
+import { useQueryClient, useMutation, useQuery } from "react-query";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import CommentForm from "./CommentForm";
 
 function Comment({ comment }) {
+  const { postId } = useParams();
+  const queryClient = useQueryClient();
   const [show, setShow] = useState(false);
   const [commentInput, setCommentInput] = useState("");
+
+  const api = useAxiosPrivate();
+  const createReplyMutation = useMutation(
+    async (commentData) => {
+      const res = await api.post(
+        `/comments/${postId}/replies/${comment._id}`,
+        commentData
+      );
+      return res.data;
+    },
+    {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries(["comments"]);
+      },
+    }
+  );
+  const deleteCommentMutation = useMutation(
+    async () => {
+      const res = await api.delete(`/comments/${comment._id}`);
+      return res.data;
+    },
+    {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries(["comments"]);
+      },
+    }
+  );
+  const handleChange = useCallback((e) => setCommentInput(e.target.value), []);
+  const handleSubmit = () => {
+    createReplyMutation.mutate(
+      { comment: { description: commentInput } },
+      {
+        onSuccess: (res) => {
+          console.log(res);
+          setCommentInput("");
+        },
+      }
+    );
+  };
+  const handleDelete = () => {
+    deleteCommentMutation.mutate();
+  };
 
   return (
     <Card elevation={1} sx={{ mt: 1 }}>
@@ -44,7 +91,7 @@ function Comment({ comment }) {
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete">
-              <IconButton>
+              <IconButton onClick={handleDelete}>
                 <Delete />
               </IconButton>
             </Tooltip>
@@ -53,7 +100,12 @@ function Comment({ comment }) {
       </ListItem>
       <Collapse in={show}>
         <Divider />
-        <CommentForm style={{ elevation: 0 }} />
+        <CommentForm
+          value={commentInput}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          style={{ elevation: 0 }}
+        />
       </Collapse>
     </Card>
   );
