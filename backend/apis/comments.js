@@ -13,6 +13,20 @@ export const getComments = async (req, res) => {
     }
 }
 
+export const getReplies = async (req, res) => {
+    const { commentId } = req.params;
+    try {
+        if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(403).send({ success: false, message: "Invalid comment id" });
+
+        const aaa = await Comment.findById(commentId).populate('replies');
+        console.log(aaa);
+        res.json(aaa.replies);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
 export const createComment = async (req, res) => {
     const { postId, commentId } = req.params;
     const { comment } = req.body;

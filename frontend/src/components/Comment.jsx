@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import moment from "moment";
 import {
   Card,
+  List,
   ListItem,
   ListItemAvatar,
   ListItemText,
@@ -12,23 +13,35 @@ import {
   Tooltip,
   Collapse,
   Divider,
+  Box,
+  Button,
 } from "@mui/material";
-import { Reply, Edit, Delete } from "@mui/icons-material";
+import { Reply, Edit, Delete, ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import { useQueryClient, useMutation, useQuery } from "react-query";
+import { axiosInstance as api } from "../apis";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import CommentForm from "./CommentForm";
 
-function Comment({ comment }) {
+function Comment({ comment, style, sx }) {
   const { postId } = useParams();
   const queryClient = useQueryClient();
-  const [show, setShow] = useState(false);
+  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const [commentInput, setCommentInput] = useState("");
 
-  const api = useAxiosPrivate();
+  const { data: replies } = useQuery(["comments", comment._id, "replies"], async () => {
+    const res = await api.get(`/comments/${comment._id}/replies`);
+    return res.data;
+  }, {
+    onSuccess: console.log,
+    enabled: showReplies
+  });
+
+  const authApi = useAxiosPrivate();
   const createReplyMutation = useMutation(
     async (commentData) => {
-      const res = await api.post(
+      const res = await authApi.post(
         `/comments/${postId}/replies/${comment._id}`,
         commentData
       );
@@ -42,7 +55,7 @@ function Comment({ comment }) {
   );
   const deleteCommentMutation = useMutation(
     async () => {
-      const res = await api.delete(`/comments/${comment._id}`);
+      const res = await authApi.delete(`/comments/${comment._id}`);
       return res.data;
     },
     {
@@ -59,6 +72,8 @@ function Comment({ comment }) {
         onSuccess: (res) => {
           console.log(res);
           setCommentInput("");
+          setShowCommentInput(false);
+          setShowReplies(true);
         },
       }
     );
@@ -68,7 +83,7 @@ function Comment({ comment }) {
   };
 
   return (
-    <Card elevation={1} sx={{ mt: 1 }}>
+    <Card sx={{ mt: 2, ...sx }} {...style} raised >
       <ListItem alignItems="flex-start">
         <ListItemAvatar>
           <Avatar>{comment.authorName.toUpperCase()[0]}</Avatar>
@@ -79,26 +94,34 @@ function Comment({ comment }) {
             secondary={moment(comment.createdAt).fromNow()}
           />
           <Typography variant="body2">{comment.description}</Typography>
-          <Stack mt={2} direction="row" justifyContent="flex-end">
-            <Tooltip title="Reply">
-              <IconButton onClick={() => setShow((show) => !show)}>
-                <Reply />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Edit">
-              <IconButton>
-                <Edit />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <IconButton onClick={handleDelete}>
-                <Delete />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' mt={2}>
+            {!comment.isReply && replies?.length > 0 &&
+              <Button startIcon={showReplies ? <ArrowDropUp /> : <ArrowDropDown />} onClick={() => setShowReplies(show => !show)}>
+                {showReplies ? `Hide ${comment.replies.length === 1 ? "reply" : "replies"}` : `${comment.replies.length} ${comment.replies.length === 1 ? "reply" : "replies"}`}
+              </Button>
+            }
+            <Box sx={{ flexGrow: 1 }} />
+            <Stack direction="row" justifyContent="flex-end">
+              <Tooltip title="Reply">
+                <IconButton onClick={() => setShowCommentInput((show) => !show)}>
+                  <Reply />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Edit">
+                <IconButton>
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <IconButton onClick={handleDelete}>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
         </Stack>
       </ListItem>
-      <Collapse in={show}>
+      <Collapse in={showCommentInput}>
         <Divider />
         <CommentForm
           value={commentInput}
@@ -106,6 +129,13 @@ function Comment({ comment }) {
           onSubmit={handleSubmit}
           style={{ elevation: 0 }}
         />
+      </Collapse>
+      <Collapse in={showReplies}>
+        <List sx={{ ml: 4 }}>
+          {replies?.map((comment) => (
+            <Comment key={comment._id} comment={comment} style={{ elevation: 1 }} />
+          ))}
+        </List>
       </Collapse>
     </Card>
   );

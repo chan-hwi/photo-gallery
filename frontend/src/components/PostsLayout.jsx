@@ -4,7 +4,7 @@ import Post from './Post';
 function PostsLayout({ posts }) {
     console.log(posts);
   return (
-    <ImageList variant='masonry' cols={3} gap={8}>
+    <ImageList cols={4} gap={8}>
         {posts?.map(post => (
             <Post key={post._id} post={post}/>
         ))}

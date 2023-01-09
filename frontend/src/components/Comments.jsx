@@ -69,8 +69,8 @@ function Comments() {
         onSubmit={handleSubmit}
       />
       <List sx={{ whiteSpace: "pre-wrap" }}>
-        {comments?.map((comment) => (
-          <Comment key={comment._id} comment={comment} />
+        {comments?.filter(comment => !comment.isReply).map((comment) => (
+          <Comment key={comment._id} comment={comment} style={{ elevation: 1 }} />
         ))}
       </List>
     </Stack>

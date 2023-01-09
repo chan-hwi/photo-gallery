@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getComments,
+  getReplies,
   createComment,
   updateComment,
   deleteComment
@@ -9,6 +10,8 @@ import {
 const router = express.Router();
 
 router.get("/", getComments);
+
+router.get("/:commentId/replies", getReplies);
 
 router.post(["/:postId", "/:postId/replies/:commentId"], createComment);
 
