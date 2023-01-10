@@ -3,10 +3,27 @@ import { Post, User, Comment } from '../models/index.js';
 
 export const getComments = async (req, res) => {
     const { pid } = req.query;
+    const page = parseInt(req?.query.page) || 1;
+    const cnt = parseInt(req?.query?.cnt || process.env.DEFAULT_REPLY_COUNT_PER_PAGE);
+    const { sort, ord } = req.query;
+
     try {
         if (!pid) return res.json(await Comment.find());
         if (!mongoose.Types.ObjectId.isValid(pid)) return res.status(403).send({ success: false, message: "Invalid post id" });
-        return res.json(await Comment.find({ post: pid }));
+        const commentQuery = Comment.find({ post: pid });
+        const rootQuery = Comment.find().merge(commentQuery).find({ parent: null });
+
+        const totalCnt = await commentQuery.count();
+        const rootCnt = await Comment.find().merge(rootQuery).count();
+        const comments = await rootQuery.skip(cnt * (page - 1)).limit(cnt);
+        const hasNext = cnt * (page - 1) + comments.length < rootCnt;
+
+        res.json({
+            totalCnt,
+            rootCnt,
+            comments,
+            hasNext
+        });
     } catch (e) {
         console.log(e);
         res.status(500).send("Internal Server Error");
@@ -15,12 +32,22 @@ export const getComments = async (req, res) => {
 
 export const getReplies = async (req, res) => {
     const { commentId } = req.params;
+    const page = parseInt(req?.query.page) || 1;
+    const cnt = parseInt(req?.query?.cnt || process.env.DEFAULT_REPLY_COUNT_PER_PAGE);
+
     try {
         if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(403).send({ success: false, message: "Invalid comment id" });
+        const replyQuery = Comment.find({ parent: commentId });
 
-        const aaa = await Comment.findById(commentId).populate('replies');
-        console.log(aaa);
-        res.json(aaa.replies);
+        const totalCnt = await Comment.find().merge(replyQuery).count();
+        const replies = await replyQuery.skip(cnt * (page - 1)).limit(cnt);
+        const hasNext = cnt * (page - 1) + replies.length < totalCnt;
+
+        res.json({
+            totalCnt,
+            replies,
+            hasNext
+        });
     } catch (e) {
         console.log(e);
         res.status(500).send("Internal Server Error");
@@ -43,10 +70,8 @@ export const createComment = async (req, res) => {
 
         if (commentId) {
             if (!mongoose.Types.ObjectId.isValid(commentId)) return res.status(403).send({ success: false, message: "Invalid comment id" });
-            newComment.isReply = true;
-            const parentComment = await Comment.findById(commentId);
-            parentComment.replies.push(newComment._id);
-            await parentComment.save();
+            newComment.parent = commentId;
+            await Comment.findByIdAndUpdate(commentId, { $inc: { replyCount: 1 } });
         }
 
         await newComment.save();
@@ -82,6 +107,10 @@ export const deleteComment = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
         const currentComment = await Comment.findById(id);
         if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
+
+        if (currentComment.parent)
+            await Comment.findByIdAndUpdate(currentComment.parent, { $inc: { replyCount: -1 } });
+
         await currentComment.delete();
         res.sendStatus(204);
     } catch (e) {

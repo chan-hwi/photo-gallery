@@ -21,14 +21,14 @@ const CommentSchema = new mongoose.Schema({
         ref: 'User',
         default: []
     },
-    replies: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Comment',
-        default: []
+    replyCount: {
+        type: Number,
+        default: 0
     },
-    isReply: {
-        type: Boolean,
-        default: false
+    parent: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        default: null
     },
     createdAt: {
         type: Date,
@@ -36,4 +36,5 @@ const CommentSchema = new mongoose.Schema({
     }
 });
 
-export default mongoose.model('Comment', CommentSchema);
+const Comment = mongoose.model('Comment', CommentSchema);
+export default Comment;

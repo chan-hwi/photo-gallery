@@ -15,10 +15,21 @@ import {
   Divider,
   Box,
   Button,
+  CircularProgress,
 } from "@mui/material";
-import { Reply, Edit, Delete, ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
+import {
+  Reply,
+  Edit,
+  Delete,
+  ArrowDropDown,
+  ArrowDropUp,
+} from "@mui/icons-material";
 import { useParams } from "react-router-dom";
-import { useQueryClient, useMutation, useQuery } from "react-query";
+import {
+  useQueryClient,
+  useMutation,
+  useInfiniteQuery,
+} from "react-query";
 import { axiosInstance as api } from "../apis";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import CommentForm from "./CommentForm";
@@ -30,13 +41,22 @@ function Comment({ comment, style, sx }) {
   const [showReplies, setShowReplies] = useState(false);
   const [commentInput, setCommentInput] = useState("");
 
-  const { data: replies } = useQuery(["comments", comment._id, "replies"], async () => {
-    const res = await api.get(`/comments/${comment._id}/replies`);
-    return res.data;
-  }, {
-    onSuccess: console.log,
-    enabled: showReplies
-  });
+  const { isLoading, data: replies, fetchNextPage } = useInfiniteQuery(
+    ["infiniteReplies", comment._id],
+    async ({ pageParam = 1 }) => {
+      const res = await api.get(`/comments/${comment._id}/replies`, {
+        params: {
+          page: pageParam,
+        },
+      });
+      return res.data;
+    },
+    {
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage?.hasNext ? allPages.length + 1 : null;
+      },
+    }
+  );
 
   const authApi = useAxiosPrivate();
   const createReplyMutation = useMutation(
@@ -49,7 +69,8 @@ function Comment({ comment, style, sx }) {
     },
     {
       onSuccess: (data) => {
-        queryClient.invalidateQueries(["comments"]);
+        queryClient.invalidateQueries(["infiniteComments", postId]);
+        queryClient.invalidateQueries(["infiniteReplies", comment._id]);
       },
     }
   );
@@ -60,7 +81,8 @@ function Comment({ comment, style, sx }) {
     },
     {
       onSuccess: (data) => {
-        queryClient.invalidateQueries(["comments"]);
+        queryClient.invalidateQueries(["infiniteComments", postId]);
+        queryClient.invalidateQueries(["infiniteReplies", comment._id]);
       },
     }
   );
@@ -83,7 +105,7 @@ function Comment({ comment, style, sx }) {
   };
 
   return (
-    <Card sx={{ mt: 2, ...sx }} {...style} raised >
+    <Card sx={{ mt: 2, ...sx }} {...style} raised>
       <ListItem alignItems="flex-start">
         <ListItemAvatar>
           <Avatar>{comment.authorName.toUpperCase()[0]}</Avatar>
@@ -94,16 +116,31 @@ function Comment({ comment, style, sx }) {
             secondary={moment(comment.createdAt).fromNow()}
           />
           <Typography variant="body2">{comment.description}</Typography>
-          <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' mt={2}>
-            {!comment.isReply && replies?.length > 0 &&
-              <Button startIcon={showReplies ? <ArrowDropUp /> : <ArrowDropDown />} onClick={() => setShowReplies(show => !show)}>
-                {showReplies ? `Hide ${comment.replies.length === 1 ? "reply" : "replies"}` : `${comment.replies.length} ${comment.replies.length === 1 ? "reply" : "replies"}`}
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={2}
+          >
+            {!comment.parent && comment.replyCount > 0 && (
+              <Button
+                startIcon={showReplies ? <ArrowDropUp /> : <ArrowDropDown />}
+                onClick={() => setShowReplies((show) => !show)}
+              >
+                {showReplies
+                  ? `Hide ${comment.replyCount === 1 ? "reply" : "replies"}`
+                  : `${comment.replyCount} ${
+                      comment.replyCount === 1 ? "reply" : "replies"
+                    }`}
               </Button>
-            }
+            )}
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" justifyContent="flex-end">
               <Tooltip title="Reply">
-                <IconButton onClick={() => setShowCommentInput((show) => !show)}>
+                <IconButton
+                  onClick={() => setShowCommentInput((show) => !show)}
+                >
                   <Reply />
                 </IconButton>
               </Tooltip>
@@ -131,11 +168,26 @@ function Comment({ comment, style, sx }) {
         />
       </Collapse>
       <Collapse in={showReplies}>
-        <List sx={{ ml: 4 }}>
-          {replies?.map((comment) => (
-            <Comment key={comment._id} comment={comment} style={{ elevation: 1 }} />
-          ))}
-        </List>
+        {!isLoading ?
+        <>
+          <List sx={{ ml: 4 }}>
+            {replies?.pages?.map(page => 
+              page?.replies?.map(comment =>
+                <Comment
+                  key={comment._id}
+                  comment={comment}
+                  style={{ elevation: 1 }}
+                />
+              )
+            )}
+          </List>
+          {replies?.pages?.at(-1).hasNext &&
+            <Button sx={{ mb: 2 }} onClick={() => fetchNextPage()} fullWidth>View more comments</Button>
+          }
+        </>
+        :
+        <CircularProgress />
+        }
       </Collapse>
     </Card>
   );
