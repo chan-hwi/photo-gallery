@@ -20,10 +20,18 @@ const PostSchema = new mongoose.Schema({
         ref: 'User',
         default: []
     },
+    likesCount: {
+        type: Number,
+        default: 0
+    },
     favorites: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'User',
         default: []
+    },
+    favoritesCount: {
+        type: Number,
+        default: 0
     },
     tags: {
         type: [String],

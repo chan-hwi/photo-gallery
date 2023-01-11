@@ -61,7 +61,6 @@ function Comments() {
       }
     }
   );
-  console.log(comments);
 
   if (isLoading) {
     return <CircularProgress />;

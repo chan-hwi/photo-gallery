@@ -19,7 +19,7 @@ const useDeletePostMutation = () => {
     return useMutation(deletePost, {
         onSuccess: res => {
             console.log(res);
-            queryClient.invalidateQueries(["posts"]);
+            queryClient.invalidateQueries(["infinitePosts"]);
         }
     });
     

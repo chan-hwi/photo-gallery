@@ -43,7 +43,7 @@ function Sidebar() {
       {user && 
       <>
       <ListItem disablePadding>
-        <ListItemButton component={Link} to="/posts/favorites">
+        <ListItemButton component={Link} to="/posts?category=favorites">
           <ListItemIcon>
             <Star />
           </ListItemIcon>

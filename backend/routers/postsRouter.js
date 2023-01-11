@@ -9,13 +9,11 @@ import {
   toggleFavoritePost,
   getNextPosts,
   getPrevPosts,
-  getFavoritePosts,
 } from "../apis/posts.js";
 
 const router = express.Router();
 
 router.get("/", getPosts);
-router.get("/favorites", getFavoritePosts);
 router.get("/:id", getPost);
 router.get(["/:id/next", "/:id/next/:count"], getNextPosts);
 router.get(["/:id/prev", "/:id/prev/:count"], getPrevPosts);

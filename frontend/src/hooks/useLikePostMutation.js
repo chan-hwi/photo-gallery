@@ -10,7 +10,7 @@ const useLikePostMutation = (postId) => {
         return res;
     }, {
         onSuccess: res => {
-            queryClient.invalidateQueries(["posts", postId]);
+            queryClient.invalidateQueries(["infinitePosts"]);
         },
         onError: console.log
     });

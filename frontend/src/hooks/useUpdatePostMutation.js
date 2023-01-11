@@ -19,7 +19,7 @@ const useUpdatePostMutation = () => {
     return useMutation(updatePost, {
         onSuccess: res => {
             console.log(res);
-            queryClient.invalidateQueries(["posts"]);
+            queryClient.invalidateQueries(["infinitePosts"]);
         }
     });
     
