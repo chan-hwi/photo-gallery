@@ -4,7 +4,8 @@ import {
   getReplies,
   createComment,
   updateComment,
-  deleteComment
+  deleteComment,
+  toggleLikeComment
 } from "../apis/comments.js";
 
 const router = express.Router();
@@ -16,6 +17,8 @@ router.get("/:commentId/replies", getReplies);
 router.post(["/:postId", "/:postId/replies/:commentId"], createComment);
 
 router.patch("/:id", updateComment);
+
+router.patch("/:id/likes", toggleLikeComment);
 
 router.delete("/:id", deleteComment);
 

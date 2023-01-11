@@ -5,12 +5,21 @@ export const getComments = async (req, res) => {
     const { pid } = req.query;
     const page = parseInt(req?.query.page) || 1;
     const cnt = parseInt(req?.query?.cnt || process.env.DEFAULT_REPLY_COUNT_PER_PAGE);
-    const { sort, ord } = req.query;
+    const sort = req?.query?.sort || 'id';
+    const ord = req?.query?.ord || 1;
 
     try {
         if (!pid) return res.json(await Comment.find());
         if (!mongoose.Types.ObjectId.isValid(pid)) return res.status(403).send({ success: false, message: "Invalid post id" });
-        const commentQuery = Comment.find({ post: pid });
+        let commentQuery = Comment.find({ post: pid });
+        switch (sort) {
+            case 'likes':
+                commentQuery = commentQuery.sort({ likesCount: ord });
+                break;
+            default:
+                commentQuery = commentQuery.sort({ _id: ord });
+        }
+
         const rootQuery = Comment.find().merge(commentQuery).find({ parent: null });
 
         const totalCnt = await commentQuery.count();
@@ -88,10 +97,10 @@ export const updateComment = async (req, res) => {
     if (!req.user) return res.status(403).send({ success: false, message: "Login required" });
     
     try {
-        if (!mongoose.Schema.Types.ObjectId(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
+        if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
         const currentComment = await Comment.findById(id);
         if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
-        await currentComment.update(comment);
+        await currentComment.update({ $set: { description: comment.description } });
         res.sendStatus(204);
     } catch (e) {
         console.log(e);
@@ -112,6 +121,26 @@ export const deleteComment = async (req, res) => {
             await Comment.findByIdAndUpdate(currentComment.parent, { $inc: { replyCount: -1 } });
 
         await currentComment.delete();
+        res.sendStatus(204);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+export const toggleLikeComment = async (req, res) => {
+    const { id } = req.params;
+    if (!req.user) return res.status(403).send({ success: false, message: "Login required" });
+
+    try {
+        if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
+        const currentComment = await Comment.findById(id);
+
+        if (currentComment.likes.find(curId => curId.equals(req.user.userId))) {
+            await currentComment.update({ $pull: { likes: req.user.userId }, $inc: { likesCount: -1 } });
+        } else {
+            await currentComment.update({ $push: { likes: req.user.userId }, $inc: { likesCount: 1 } });
+        }
         res.sendStatus(204);
     } catch (e) {
         console.log(e);

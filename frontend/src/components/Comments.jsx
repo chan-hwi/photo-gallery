@@ -49,7 +49,7 @@ function Comments() {
           pid: postId,
           page: pageParam,
           sort: "id",
-          ord: 1,
+          ord: -1,
         },
       });
       return res.data;
