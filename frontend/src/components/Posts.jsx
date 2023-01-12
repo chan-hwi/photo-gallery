@@ -6,7 +6,7 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import PostsLayout from './PostsLayout';
 
 function Posts() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const authApi = useAxiosPrivate();
   const params = {};
   for (const [key, value] of searchParams.entries()) {
