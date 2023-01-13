@@ -116,7 +116,7 @@ export const updatePost = async (req, res) => {
         const { post } = req.body;
         const currentPost = await Post.findById(id);
         if (!currentPost.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
-        await currentPost.update(post);
+        await currentPost.updateOne(post);
 
         res.sendStatus(204);
     } catch (e) {

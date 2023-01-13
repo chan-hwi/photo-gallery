@@ -100,7 +100,7 @@ export const updateComment = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
         const currentComment = await Comment.findById(id);
         if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
-        await currentComment.update({ $set: { description: comment.description } });
+        await currentComment.updateOne({ $set: { description: comment.description } });
         res.sendStatus(204);
     } catch (e) {
         console.log(e);
@@ -137,9 +137,9 @@ export const toggleLikeComment = async (req, res) => {
         const currentComment = await Comment.findById(id);
 
         if (currentComment.likes.find(curId => curId.equals(req.user.userId))) {
-            await currentComment.update({ $pull: { likes: req.user.userId }, $inc: { likesCount: -1 } });
+            await currentComment.updateOne({ $pull: { likes: req.user.userId }, $inc: { likesCount: -1 } });
         } else {
-            await currentComment.update({ $push: { likes: req.user.userId }, $inc: { likesCount: 1 } });
+            await currentComment.updateOne({ $push: { likes: req.user.userId }, $inc: { likesCount: 1 } });
         }
         res.sendStatus(204);
     } catch (e) {
