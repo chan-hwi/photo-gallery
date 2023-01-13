@@ -10,7 +10,7 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import { Search, Image, Star, Upload } from "@mui/icons-material";
+import { Search, Image, Star, Upload, CloudUpload } from "@mui/icons-material";
 import useUser from "../hooks/useUser";
 
 function Sidebar() {
@@ -48,6 +48,14 @@ function Sidebar() {
             <Star />
           </ListItemIcon>
           <ListItemText>즐겨 찾기한 이미지</ListItemText>
+        </ListItemButton>
+      </ListItem>
+      <ListItem disablePadding>
+        <ListItemButton component={Link} to={`/posts?author=${user.profile.id}`}>
+          <ListItemIcon>
+            <CloudUpload />
+          </ListItemIcon>
+          <ListItemText>업로드한 이미지</ListItemText>
         </ListItemButton>
       </ListItem>
       <Divider />
