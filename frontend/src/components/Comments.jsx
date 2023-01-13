@@ -57,7 +57,7 @@ function Comments() {
     {
       onSuccess: console.log,
       getNextPageParam: (lastPage, allPages) => {
-        return lastPage.hasNext ? allPages.length + 1 : null
+        return lastPage.hasNext ? allPages.length + 1 : undefined
       }
     }
   );

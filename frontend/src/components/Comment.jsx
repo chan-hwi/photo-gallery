@@ -59,7 +59,7 @@ function Comment({ comment, style, sx }) {
     },
     {
       getNextPageParam: (lastPage, allPages) => {
-        return lastPage?.hasNext ? allPages.length + 1 : null;
+        return lastPage?.hasNext ? allPages.length + 1 : undefined;
       },
     }
   );
