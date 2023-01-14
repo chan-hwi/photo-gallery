@@ -80,6 +80,7 @@ function UploadForm() {
     } else {
       createPostMutation.mutate(formData, {
         onSuccess: () => {
+          console.log('navigate');
           navigate("/");
         },
       });
@@ -125,7 +126,7 @@ function UploadForm() {
                 <img
                   src={formData.src}
                   alt={file?.name}
-                  style={{ width: "auto", maxHeight: "100%" }}
+                  style={{ width: "auto", maxHeight: "100%", maxWidth: '100%' }}
                 />
               ) : (
                 <>

@@ -115,7 +115,7 @@ export const deleteComment = async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(403).send({ success: false, message: "Invalid comment id" });
         const currentComment = await Comment.findById(id);
-        if (!currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
+        if (!currentComment || !currentComment.author.equals(req.user.userId)) return res.status(403).send({ success: false, message: "Access denied" });
 
         if (currentComment.parent)
             await Comment.findByIdAndUpdate(currentComment.parent, { $inc: { replyCount: -1 } });

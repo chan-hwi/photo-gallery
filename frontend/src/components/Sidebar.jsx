@@ -84,7 +84,7 @@ function Sidebar() {
         </ListItemButton>
       </ListItem>
       <ListItem disablePadding>
-        <ListItemButton component={Link} to={`/posts?author=${user.profile.id}`}>
+        <ListItemButton component={Link} to={`/posts?author=${user?.profile?.id}`}>
           <ListItemIcon>
             <CloudUpload />
           </ListItemIcon>
