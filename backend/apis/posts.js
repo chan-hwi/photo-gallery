@@ -6,6 +6,7 @@ export const getPosts = async (req, res) => {
     const cnt = parseInt(req?.query?.cnt || process.env.DEFAULT_POST_COUNT_PER_PAGE);
     const sort = req?.query?.sort || 'id';
     const ord = req?.query?.ord || 1;
+    const { keyword } = req.query;
 
     try {
         let query = Post.find();
@@ -29,6 +30,10 @@ export const getPosts = async (req, res) => {
                 break;
             default:
                 query = query.sort({ _id: ord });
+        }
+        
+        if (keyword) {
+            query = query.find({ $and: keyword.split(' ').map(key => ({ title: { $regex: new RegExp(key, "i") } })) });
         }
         
         const totalCnt = await Post.find().merge(query).countDocuments();
