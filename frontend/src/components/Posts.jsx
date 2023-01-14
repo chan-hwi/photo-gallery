@@ -1,14 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { CircularProgress, Box } from '@mui/material'
 import { useInView } from 'react-intersection-observer';
-import { useInfiniteQuery, useQueryClient } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { useSearchParams } from 'react-router-dom';
 import { axiosInstance as api } from '../apis';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import PostsLayout from './PostsLayout';
 
 function Posts() {
-  const queryClient = useQueryClient();
   const { ref: pageEndRef, inView } = useInView();
   const [searchParams] = useSearchParams();
   const authApi = useAxiosPrivate();
@@ -37,7 +36,6 @@ function Posts() {
     if (inView) fetchNextPage();
   }, [inView]);
   
-  console.log(posts);
   return (
   <>
     {!isLoading && <PostsLayout posts={posts}/>}
@@ -51,4 +49,4 @@ function Posts() {
   )
 }
 
-export default Posts
+export default Posts;

@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   List,
@@ -9,29 +9,47 @@ import {
   Divider,
   TextField,
   InputAdornment,
+  IconButton,
+  Collapse
 } from "@mui/material";
-import { Search, Image, Star, Upload, CloudUpload } from "@mui/icons-material";
+import { Search, Image, Star, Upload, CloudUpload, FilterAlt } from "@mui/icons-material";
+import DetailedSearchForm from './DetailedSearchForm';
 import useUser from "../hooks/useUser";
 
 function Sidebar() {
   const { user } = useUser();
+  const [showSearchForm, setShowSearchForm] = useState(false);
 
   return (
     <List>
-      <ListItem sx={{ pb: 2 }}>
-        <TextField
-          label="검색"
-          variant="standard"
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        ></TextField>
+      <ListItem sx={{ pb: 2 }}
+        secondaryAction={
+          <IconButton 
+            onClick={() => setShowSearchForm(show => !show)}
+            sx={{ transform: 'translate(50%)' }} >
+            <FilterAlt />
+          </IconButton>
+        }
+      >
+          <TextField
+            label="검색"
+            variant="standard"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
       </ListItem>
+      <Collapse in={showSearchForm}>
+        <ListItem disablePadding sx={{ py: 2 }}>
+          <DetailedSearchForm />
+        </ListItem>
+        <Divider />
+      </Collapse>
       <ListItem disablePadding>
         <ListItemButton component={Link} to="/posts">
           <ListItemIcon>
