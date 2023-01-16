@@ -1,56 +1,114 @@
-import React from 'react'
-import { axiosInstance as api } from '../apis'; 
-import { Link } from 'react-router-dom';
-import { Paper, Container, Grid } from '@mui/material';
-import { useQuery } from 'react-query';
+import React from "react";
+import { axiosInstance as api } from "../apis";
+import { Link } from "react-router-dom";
+import { Paper, Container, Grid, Box, CircularProgress } from "@mui/material";
+import { useQuery } from "react-query";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useQueryParams from "../hooks/useQueryParams";
 
 function PostDetailNav({ post }) {
-    const { data: nextPosts } = useQuery(["posts", post._id, "next", 3], async () => {
-        const res = await api.get(`/posts/${post._id}/next/3`);
-        return res.data;
-    });
-    const { data: prevPosts } = useQuery(["posts", post._id, "prev", 3], async () => {
-        const res = await api.get(`/posts/${post._id}/prev/3`);
-        return res.data;
-    });
+  const authApi = useAxiosPrivate();
+  const params = useQueryParams();
+
+  const nextPostsParams = { ...params, id_gt: post._id, cnt: 3 };
+  const { isLoading: isLoadingNextPosts, data: nextPosts } = useQuery(
+    ["posts", nextPostsParams],
+    async () => {
+      const res = await authApi.get(`/posts`, { params: nextPostsParams });
+      return res.data;
+    }
+  );
+
+  const prevPostsParams = {
+    ...params,
+    id_lt: post._id,
+    ord: params.ord ? params.ord * -1 : -1,
+    cnt: 3,
+  };
+  const { isLoading: isLoadingPrevPosts, data: prevPosts } = useQuery(
+    ["posts", prevPostsParams],
+    async () => {
+      const res = await authApi.get(`/posts`, { params: prevPostsParams });
+      return res.data;
+    }
+  );
+
+  if (isLoadingNextPosts || isLoadingPrevPosts) {
+    <Box display='flex' justifyContent='center' alignItems='center'><CircularProgress /></Box>
+  }
 
   return (
     <Paper sx={{ py: 1 }}>
-        <Container>
-            <Grid container spacing={2} columns={7}>
-                {prevPosts?.length < 3 && <Grid item xs={3 - prevPosts.length}></Grid>}
-                {prevPosts && [...prevPosts].reverse().map(post => 
-                    <Grid item xs={1} key={post._id} component={Link} to={`/posts/${post._id}`}>
-                        {post._id !== -1 ?
-                            <Paper elevation={3}>
-                                <img src={post.src} alt={post._id} height="70px" width="100%" style={{ objectFit: "contain", backgroundColor: "black" }}/>
-                            </Paper>
-                        :
-                            <div></div>
-                        }
-                    </Grid>
+      <Container>
+        <Grid container spacing={2} columns={7}>
+          {prevPosts?.posts?.length < 3 && (
+            <Grid item xs={3 - prevPosts.posts.length}></Grid>
+          )}
+          {prevPosts &&
+            [...prevPosts.posts].reverse().map((post) => (
+              <Grid
+                item
+                xs={1}
+                key={post._id}
+                component={Link}
+                to={{ pathname: `/posts/${post._id}`, search: '?' + new URLSearchParams(params).toString() }}
+              >
+                {post._id !== -1 ? (
+                  <Paper elevation={3}>
+                    <img
+                      src={post.src}
+                      alt={post._id}
+                      height="70px"
+                      width="100%"
+                      style={{ objectFit: "contain", backgroundColor: "black" }}
+                    />
+                  </Paper>
+                ) : (
+                  <div></div>
                 )}
-                <Grid item xs={1} display="flex" justifyContent="center">
-                    <Paper elevation={6}>
-                        <img src={post.src} alt={post._id} height="70px" width="100%" style={{ objectFit: "contain", backgroundColor: "black" }} />
-                    </Paper>
-                </Grid>
-                {nextPosts?.map(post => 
-                    <Grid item xs={1} key={post._id} component={Link} to={`/posts/${post._id}`}>
-                        {post._id !== -1 ?
-                            <Paper elevation={3}>
-                                <img src={post.src} alt={post._id} height="70px" width="100%" style={{ objectFit: "contain", backgroundColor: "black" }}/>
-                            </Paper>
-                        :
-                            <div></div>
-                        }
-                    </Grid>
-                )}
-                {nextPosts?.length < 3 && <Grid item xs={3 - nextPosts.length}></Grid>}
+              </Grid>
+            ))}
+          <Grid item xs={1} display="flex" justifyContent="center" sx={{ filter: 'brightness(70%)' }}>
+            <Paper elevation={6}>
+              <img
+                src={post.src}
+                alt={post._id}
+                height="70px"
+                width="100%"
+                style={{ objectFit: "contain", backgroundColor: "black" }}
+              />
+            </Paper>
+          </Grid>
+          {nextPosts?.posts?.map((post) => (
+            <Grid
+              item
+              xs={1}
+              key={post._id}
+              component={Link}
+              to={{ pathname: `/posts/${post._id}`, search: '?' + new URLSearchParams(params).toString() }}
+            >
+              {post._id !== -1 ? (
+                <Paper elevation={3}>
+                  <img
+                    src={post.src}
+                    alt={post._id}
+                    height="70px"
+                    width="100%"
+                    style={{ objectFit: "contain", backgroundColor: "black" }}
+                  />
+                </Paper>
+              ) : (
+                <div></div>
+              )}
             </Grid>
-        </Container>
+          ))}
+          {nextPosts?.posts?.length < 3 && (
+            <Grid item xs={3 - nextPosts.posts.length}></Grid>
+          )}
+        </Grid>
+      </Container>
     </Paper>
-  )
+  );
 }
 
-export default PostDetailNav
+export default PostDetailNav;

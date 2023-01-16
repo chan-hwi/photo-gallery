@@ -12,10 +12,12 @@ import { Link, useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import useDeletePostMutation from "../hooks/useDeletePostMutation";
 import moment from "moment";
+import useQueryParams from "../hooks/useQueryParams";
 
 function Post({ post }) {
   const { user } = useUser();
   const [anchorEl, setAnchorEl] = useState(null);
+  const params = useQueryParams();
   const deletePostMutation = useDeletePostMutation();
   const navigate = useNavigate();
 
@@ -54,7 +56,7 @@ function Post({ post }) {
   };
 
   return (
-    <ImageListItem component={Link} to={`/posts/${post._id}`}>
+    <ImageListItem component={Link} to={{ pathname: `/posts/${post._id}`, search: '?' + new URLSearchParams(params).toString() }}>
       <img src={post.src} alt={post.title} />
       <ImageListItemBar
         title={post.title}

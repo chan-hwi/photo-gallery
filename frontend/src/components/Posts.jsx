@@ -1,28 +1,19 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { CircularProgress, Box, Typography } from '@mui/material'
 import { useInView } from 'react-intersection-observer';
 import { useInfiniteQuery } from 'react-query';
-import { useSearchParams } from 'react-router-dom';
+import useQueryParams from '../hooks/useQueryParams';
 import { axiosInstance as api } from '../apis';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import PostsLayout from './PostsLayout';
 
 function Posts() {
   const { ref: pageEndRef, inView } = useInView();
-  const [searchParams] = useSearchParams();
+  const params = useQueryParams();
   const authApi = useAxiosPrivate();
 
-  const params = useMemo(() => {
-    const curParams = {};
-    for (const [key, value] of searchParams.entries()) {
-      curParams[key] = value;
-    }
-    return curParams;
-  }, [searchParams]);
-
   const { isLoading, isFetchingNextPage, fetchNextPage, data: posts } = useInfiniteQuery(["infinitePosts", params], async ({ pageParam = 1 }) => {
-    console.log("params", params);
-    const res = await (searchParams?.get('category') === 'favorites' ? authApi : api).get('/posts', { params: {
+    const res = await (params?.category === 'favorites' ? authApi : api).get('/posts', { params: {
       ...params,
       page: pageParam,
       sort: 'id',
@@ -40,10 +31,6 @@ function Posts() {
   useEffect(() => {
     if (inView) fetchNextPage();
   }, [inView]);
-
-  useEffect(() => {
-
-  });
   
   return (
   <>
