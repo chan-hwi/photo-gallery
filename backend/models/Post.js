@@ -34,7 +34,8 @@ const PostSchema = new mongoose.Schema({
         default: 0
     },
     tags: {
-        type: [String],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Tag',
         default: []
     },
     createdAt: {

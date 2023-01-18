@@ -17,21 +17,34 @@ import { useNavigate } from 'react-router-dom';
   import DetailedSearchForm from './DetailedSearchForm';
 import useUser from "../hooks/useUser";
 import { useCallback } from "react";
+import useQueryParams from "../hooks/useQueryParams";
 
 function Sidebar() {
   const { user } = useUser();
-  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
+  const [tags, setTags] = useState([]);
   const [showSearchForm, setShowSearchForm] = useState(false);
+  const params = useQueryParams();
+  const navigate = useNavigate();
 
   const handleChange = useCallback(e => setSearchInput(e.target.value), []);
 
+  const handleSetTag = useCallback((newTags) => {
+    setTags((tags) =>
+      typeof newTags === "function" ? newTags(tags) : newTags
+    );
+  }, []);
+  
   const handleSubmit = useCallback(e => {
-    if(e.code !== 'Enter' || searchInput === '') return;
+    if(e.code !== 'Enter') return;
     
-    navigate(`/posts?keyword=${searchInput.trim()}`);
-    setSearchInput("");
-  }, [navigate, searchInput]);
+    const filteredParams = { ...params, 'keyword': searchInput, 'tags': tags.map(tag => tag._id) };
+    if (!searchInput) delete filteredParams.keyword;
+    if (tags.length === 0) delete filteredParams.tags;
+
+    navigate({ pathname: "/posts", search: '?' + new URLSearchParams(filteredParams).toString() });
+  }, [tags, params, navigate, searchInput]);
+
   return (
     <List>
       <ListItem sx={{ pb: 2 }}
@@ -61,7 +74,7 @@ function Sidebar() {
       </ListItem>
       <Collapse in={showSearchForm}>
         <ListItem disablePadding sx={{ py: 2 }}>
-          <DetailedSearchForm />
+          <DetailedSearchForm tags={tags} setTags={handleSetTag} />
         </ListItem>
         <Divider />
       </Collapse>

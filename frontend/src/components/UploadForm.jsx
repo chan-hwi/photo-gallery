@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Grid,
@@ -12,16 +12,18 @@ import {
   Alert,
 } from "@mui/material";
 import { Upload as UploadIcon } from "@mui/icons-material";
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 import { useNavigate, useLocation } from "react-router-dom";
-import useCreatePostMutation from '../hooks/useCreatePostMutation';
-import useUpdatePostMutation from '../hooks/useUpdatePostMutation';
+import useCreatePostMutation from "../hooks/useCreatePostMutation";
+import useUpdatePostMutation from "../hooks/useUpdatePostMutation";
 import FileUpload from "./FileUpload";
+import TagTextField from "./TagTextField";
 
 const initialFormData = {
   title: "",
   description: "",
   src: "",
+  tags: []
 };
 
 function UploadForm() {
@@ -49,11 +51,15 @@ function UploadForm() {
   };
 
   const handleChange = (e) => {
-      setFormData((formData) => ({
+    setFormData((formData) => ({
       ...formData,
       [e.target.name]: e.target.value,
     }));
   };
+
+  const handleChangeTag = useCallback(newValue => {
+    setFormData(formData => ({ ...formData, tags: (typeof newValue === 'function' ? newValue(formData.tags) : newValue) }));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -72,15 +78,18 @@ function UploadForm() {
     }
 
     if (location.state?.post) {
-      updatePostMutation.mutate({ id: location.state.post._id, formData }, {
-        onSuccess: () => {
-          navigate("/");
-        },
-      });
+      updatePostMutation.mutate(
+        { id: location.state.post._id, formData },
+        {
+          onSuccess: () => {
+            navigate("/");
+          },
+        }
+      );
     } else {
       createPostMutation.mutate(formData, {
         onSuccess: () => {
-          console.log('navigate');
+          console.log("navigate");
           navigate("/");
         },
       });
@@ -94,11 +103,17 @@ function UploadForm() {
   useEffect(() => {
     if (location.state?.post) {
       const { post } = location.state;
-      
-      const imageData = post.src.split(',');
+
+      const imageData = post.src.split(",");
       const mime = imageData[0].match(/:(.*?);/)[1];
 
-      setFile(new File(Buffer.from(imageData[1], "base64"), post._id + `.${mime.split('/')[1]}`, {type: mime}));
+      setFile(
+        new File(
+          Buffer.from(imageData[1], "base64"),
+          post._id + `.${mime.split("/")[1]}`,
+          { type: mime }
+        )
+      );
       setFormData(post);
     }
   }, []);
@@ -126,7 +141,7 @@ function UploadForm() {
                 <img
                   src={formData.src}
                   alt={file?.name}
-                  style={{ width: "auto", maxHeight: "100%", maxWidth: '100%' }}
+                  style={{ width: "auto", maxHeight: "100%", maxWidth: "100%" }}
                 />
               ) : (
                 <>
@@ -167,7 +182,20 @@ function UploadForm() {
           ></TextField>
         </Grid>
         <Grid item sm={12}>
-          <Button type="submit" variant="contained" color="primary" onClick={handleSubmit} fullWidth>
+          <TagTextField
+            creatable
+            value={formData?.tags}
+            setValue={handleChangeTag}
+          />
+        </Grid>
+        <Grid item sm={12}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            fullWidth
+          >
             Submit
           </Button>
         </Grid>

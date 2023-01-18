@@ -1,25 +1,8 @@
-import { useState } from "react";
-import { TextField, Autocomplete } from "@mui/material";
+import { useState, useCallback } from "react";
+import TagTextField from "./TagTextField";
 
-function DetailedSearchForm() {
-  const [value, setValue] = useState([]);  
-
-  return (
-      <Autocomplete 
-        multiple
-        value={value}
-        isOptionEqualToValue={(option, value) => option.label === value.label}
-        filterSelectedOptions
-        onChange={(e, newValue) => setValue(value => {
-          console.log("new value", newValue);
-          return newValue;
-        })}
-        options={[{ 'label': '1' }, { 'label': '2' }, { 'label': '3' }]}
-        getOptionLabel={(option) => option.label}
-        renderInput={params => <TextField {...params} label='Tags' fullWidth />}
-        fullWidth
-      />
-  );
+function DetailedSearchForm({ tags, setTags }) {
+  return <TagTextField value={tags} setValue={setTags} />;
 }
 
 export default DetailedSearchForm;

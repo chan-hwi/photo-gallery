@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import { postsRouter, authRouter, commentsRouter } from "./routers/index.js";
+import { postsRouter, authRouter, commentsRouter, tagsRouter } from "./routers/index.js";
 import { AuthMiddleware } from "./middlewares/auth.js";
 
 dotenv.config();
@@ -22,6 +22,7 @@ app.use(AuthMiddleware);
 app.use("/posts", postsRouter);
 app.use("/comments", commentsRouter);
 app.use("/auth", authRouter);
+app.use("/tags", tagsRouter);
 
 mongoose
   .connect(

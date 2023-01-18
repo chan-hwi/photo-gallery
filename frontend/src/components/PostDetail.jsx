@@ -11,7 +11,8 @@ import {
   CardMedia,
   CardContent,
   CardActions,
-  Divider
+  Divider,
+  Chip
 } from "@mui/material";
 import { Favorite, FavoriteBorder, Star, StarBorder } from '@mui/icons-material';
 import { useParams } from "react-router-dom";
@@ -49,6 +50,8 @@ function PostDetail() {
     );
   }
 
+  console.log(post);
+
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
       <PostDetailNav post={post}/>
@@ -68,6 +71,11 @@ function PostDetail() {
             <Typography variant="h4">{post.title}</Typography>
             <Typography variant="subtitle2" color="text.secondary">Posted by {post.authorName} | {new Date(post.createdAt).toLocaleString()}</Typography>
             <Typography variant="body2" sx={{ mt: 2 }}>{post.description}</Typography>
+          </CardContent>
+          <CardContent>
+            <Stack direction='row' spacing={1}>
+              {post.tags.map(tag => <Chip label={tag.title} key={tag._id}/>)}
+            </Stack>
           </CardContent>
           <CardActions>
             <Stack direction="row" spacing={2}>

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Post, User } from "../models/index.js";
+import { Post, User, Tag } from "../models/index.js";
 
 export const getPosts = async (req, res) => {
   const page = parseInt(req?.query?.page || 1);
@@ -18,7 +18,7 @@ export const getPosts = async (req, res) => {
     id_lt,
     id_lte,
     field,
-    keyword
+    keyword,
   } = req.query;
 
   try {
@@ -52,13 +52,19 @@ export const getPosts = async (req, res) => {
     if (id_gte) query = query.find({ _id: { $gte: id_gte } });
     if (id_lt) query = query.find({ _id: { $lt: id_lt } });
     if (id_lte) query = query.find({ _id: { $lte: id_lte } });
-    
+
+    if (req.query.tags) {
+      const tags = req.query.tags.split(',').filter(tag => mongoose.Types.ObjectId.isValid(tag));
+      query = query.find({ tags: { $all: tags } });
+    }
 
     if (keyword) {
       query = query.find({
         $and: keyword
           .split(" ")
-          .map((key) => ({ [(field || 'title')]: { $regex: new RegExp(key, "i") } })),
+          .map((key) => ({
+            [field || "title"]: { $regex: new RegExp(key, "i") },
+          })),
       });
     }
 
@@ -71,7 +77,7 @@ export const getPosts = async (req, res) => {
     }
 
     const totalCnt = await Post.find().merge(query).countDocuments();
-    const posts = await query.skip(cnt * (page - 1)).limit(cnt);
+    const posts = await query.skip(cnt * (page - 1)).limit(cnt).populate('tags');
     const hasNext = cnt * (page - 1) + posts.length < totalCnt;
 
     res.json({
@@ -91,7 +97,7 @@ export const getPost = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(403).send({ success: false, message: "Invalid post id" });
   try {
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate('tags');
     res.status(200).json(post);
   } catch (e) {
     console.log(e);
@@ -145,6 +151,13 @@ export const createPost = async (req, res) => {
 
     post.author = req.user.userId;
     post.authorName = currentUser.nickname;
+    post.tags = await Promise.all(
+      post.tags.map(async (tag) => {
+        if (tag._id && mongoose.Types.ObjectId.isValid(tag._id)) return tag._id;
+        const tagDoc = await new Tag(tag).save();
+        return tagDoc._id;
+      })
+    );
 
     const newPost = new Post(post);
     await newPost.save();
@@ -165,6 +178,15 @@ export const updatePost = async (req, res) => {
     const currentPost = await Post.findById(id);
     if (!currentPost.author.equals(req.user.userId))
       return res.status(403).send({ success: false, message: "Access denied" });
+
+    post.tags = await Promise.all(
+      post.tags.map(async (tag) => {
+        if (tag._id && mongoose.Types.ObjectId.isValid(tag._id)) return tag._id;
+
+        const tagDoc = await new Tag(tag).save();
+        return tagDoc._id;
+      })
+    );
     await currentPost.updateOne(post);
 
     res.sendStatus(204);
