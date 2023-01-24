@@ -19,7 +19,7 @@ function Posts() {
       sort: 'id',
       ord: -1
     }});
-    return res.data;  
+    return res.data;
   }, {
     onSuccess: console.log,
     getNextPageParam: (lastPage, allPages) => {

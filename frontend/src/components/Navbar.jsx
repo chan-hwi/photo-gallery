@@ -45,7 +45,7 @@ function Navbar() {
           disableRipple
         >
           <Typography variant="h4" sx={{ mr: 4 }}>
-            웹 저장소
+            Photo gallery
           </Typography>
         </Button>
         <Box sx={{ flexGrow: 1 }} />
