@@ -12,32 +12,52 @@ import {
 } from "@mui/material";
 import { debounce } from "@mui/material/utils";
 import { useEffect, useMemo, useCallback, useState } from "react";
+import { TagType } from "types/models";
 import { axiosInstance as api } from "../apis";
 
-const filter = createFilterOptions();
+interface paramType {
+  creatable?: boolean;
+  value: TagType[];
+  setValue: (newTags : TagType[] | ((newTags : TagType[]) => TagType[])) => void;
+};
 
-const initialTagFormData = { title: '', description: '' };
+interface newTagType {
+  dummy: boolean;
+  inputValue: string;
+  title: string;
+};
 
-function DetailedSearchForm({ creatable, value, setValue }) {
-  const [open, setOpen] = useState(false);
-  const [newTag, setNewTag] = useState(initialTagFormData);
-  const [inputValue, setInputValue] = useState("");
-  const [options, setOptions] = useState([]);
+function isNewTagType(option: optionType): option is newTagType {
+  return 'dummy' in option;
+} 
+
+type optionType = TagType | newTagType;
+
+const filter = createFilterOptions<optionType>();
+
+const initialTagFormData : TagType = { title: '', description: '' };
+
+function DetailedSearchForm({ creatable, value, setValue } : paramType) {
+  const [open, setOpen] = useState<boolean>(false);
+  const [newTag, setNewTag] = useState<TagType>(initialTagFormData);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [options, setOptions] = useState<optionType[]>([]);
 
   const handleClose = useCallback(() => setOpen(false), []);
 
-  const handleSubmit = useCallback(e => {
+  const handleSubmit = useCallback((e : React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setValue(value => [...value, newTag]);
+    setValue((value : TagType[]) => [...value, newTag]);
     setOpen(false);
 
     setNewTag(initialTagFormData);
   }, [newTag, setValue]);
 
-  const handleChange = useCallback((e, newValue) => {
-    const added = newValue.find((v) => v.dummy);
-    if (!added) return setValue(newValue);
+  const handleChange = useCallback((e : React.SyntheticEvent, newValue : optionType[]) => {
+    const added = newValue.find(v => isNewTagType(v)) as newTagType | undefined;
+    
+    if (!added) return setValue(newValue as TagType[]);
 
     setOpen(true);
     setNewTag({ title: added.inputValue, description: '' });
@@ -45,9 +65,9 @@ function DetailedSearchForm({ creatable, value, setValue }) {
 
   const fetchOptions = useMemo(
     () =>
-      debounce((keyword, cb) => {
+      debounce((keyword : string, cb : (options: TagType[]) => void) => {
         api
-          .get(`/tags?keyword=${keyword}&cnt=20`)
+          .get<TagType[]>(`/tags?keyword=${keyword}&cnt=20`)
           .then((res) => res.data)
           .then(cb);
       }, 200),
@@ -57,7 +77,7 @@ function DetailedSearchForm({ creatable, value, setValue }) {
   useEffect(() => {
     let active = true;
 
-    fetchOptions(inputValue, (options) => {
+    fetchOptions(inputValue, (options : TagType[]) => {
       if (active) {
         setOptions(options);
       }
@@ -122,7 +142,7 @@ function DetailedSearchForm({ creatable, value, setValue }) {
               fullWidth
             />
             <TextField
-              value={newTag.year}
+              value={newTag.description}
               onChange={(e) =>
                 setNewTag({
                   ...newTag,
