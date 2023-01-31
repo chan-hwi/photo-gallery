@@ -18,13 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import useUser from "../hooks/useUser";
 import { useCallback } from "react";
 import useQueryParams from "../hooks/useQueryParams";
-import type { TagType } from '../types/models';
-
-interface SearchParamType {
-  keyword?: string | undefined;
-  tags?: (string | undefined)[];
-  [k: string]: any;
-};
+import type { TagType, PostSearchParamsType } from '../types/models';
 
 function Sidebar() {
   const { user } = useUser();
@@ -45,7 +39,7 @@ function Sidebar() {
   const handleSubmit = useCallback((e : React.KeyboardEvent<HTMLDivElement>) => {
     if(e.code !== 'Enter') return;
     
-    const filteredParams : SearchParamType = { ...params, 'keyword': searchInput, 'tags': tags.map(tag => tag._id) };
+    const filteredParams : PostSearchParamsType = { ...params, keyword: searchInput, tags: tags.map(tag => tag._id) };
     if (!searchInput) delete filteredParams.keyword;
     if (tags.length === 0) delete filteredParams.tags;
 

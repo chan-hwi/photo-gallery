@@ -6,7 +6,7 @@ import useQueryParams from "../hooks/useQueryParams";
 import { axiosInstance as api } from "../apis";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import PostsLayout from "./PostsLayout";
-import type { PostType, PostPageType } from "../types/models";
+import type { PostPageType } from "../types/models";
 
 function Posts() {
   const { ref: pageEndRef, inView } = useInView();
