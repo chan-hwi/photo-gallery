@@ -12,9 +12,9 @@ import useAuth from '../hooks/useAuth';
 import { isAxiosError } from "axios";
 
 function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errMsg, setErrMsg] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [errMsg, setErrMsg] = useState<string>("");
   const { login } = useAuth();
   const navigate = useNavigate();
 

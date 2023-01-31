@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import useUser from "./useUser";
 import useAxiosPrivate from "./useAxiosPrivate";
-import type { UserType } from '../types/models';
+import type { UserType, UserFormType } from '../types/models';
 
 const useAuth = () => {
     const api = useAxiosPrivate();
@@ -12,7 +12,7 @@ const useAuth = () => {
         setUser(res.data);
     }, [setUser, api]);
 
-    const register = useCallback(async (user : UserType | undefined) => {
+    const register = useCallback(async (user : UserFormType) => {
         const res = await api.post<UserType>('/auth/register', { user });
         setUser(res.data);
     }, [setUser, api]);

@@ -33,6 +33,8 @@ export interface UserType {
   profile: ProfileType;
 };
 
+export type UserFormType = Pick<ProfileType, "username" | "nickname" | "email" | "profilesrc"> & { password: string; };
+
 export interface TagType {
   _id?: string;
   title: string;
