@@ -58,7 +58,7 @@ function PostDetailNav({ post }: paramType) {
                 component={Link}
                 to={{
                   pathname: `/posts/${post._id}`,
-                  search: "?" + new URLSearchParams(params).toString(),
+                  search: "?" + new URLSearchParams(params as any).toString(),
                 }}
               >
                 <Paper elevation={3}>
@@ -97,7 +97,7 @@ function PostDetailNav({ post }: paramType) {
               component={Link}
               to={{
                 pathname: `/posts/${post._id}`,
-                search: "?" + new URLSearchParams(params).toString(),
+                search: "?" + new URLSearchParams(params as any).toString(),
               }}
             >
               <Paper elevation={3}>

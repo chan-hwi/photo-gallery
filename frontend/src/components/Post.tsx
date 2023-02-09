@@ -64,7 +64,7 @@ function Post({ post } : paramType) {
   };
 
   return (
-    <ImageListItem component={Link} to={{ pathname: `/posts/${post._id}`, search: '?' + new URLSearchParams(params).toString() }}>
+    <ImageListItem component={Link} to={{ pathname: `/posts/${post._id}`, search: '?' + new URLSearchParams(params as any).toString() }}>
       <img src={post.src} alt={post.title} />
       <ImageListItemBar
         title={post.title}

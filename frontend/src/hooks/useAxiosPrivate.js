@@ -15,6 +15,7 @@ const useAxiosPrivate = () => {
     
     useEffect(() => {
         const reqInterceptorFn = api.interceptors.request.use(config => {
+            console.log('req int');
             if (!config?.headers['Authorization'])
                 config.headers['Authorization'] = `Bearer ${token}`;
 
@@ -35,8 +36,8 @@ const useAxiosPrivate = () => {
         });
 
         return () => {
-            axios.interceptors.request.eject(reqInterceptorFn);
-            axios.interceptors.response.eject(resInterceptorFn);
+            api.interceptors.request.eject(reqInterceptorFn);
+            api.interceptors.response.eject(resInterceptorFn);
         }
 
     }, [token, refresh]);

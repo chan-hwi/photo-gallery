@@ -18,6 +18,7 @@ const getProfile = (userDoc) => {
 export const login = async (req, res) => {
     const { username, password } = req.body;
 
+    console.log('here');
     if (req.user) return res.status(403).send({ success: false, message: "User already logged in" });
     try {
         const currentUser = await User.findOne({ username });
@@ -34,6 +35,9 @@ export const login = async (req, res) => {
 
         currentUser.refreshTokens.push(refresh_token);
         await currentUser.save();
+
+        console.log('refresh access_token', access_token);
+        console.log('refresh refresh_token', refresh_token);
 
         return res.status(200).json({ token: access_token, profile: getProfile(currentUser) });
     } catch (e) {

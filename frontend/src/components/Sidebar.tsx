@@ -43,7 +43,7 @@ function Sidebar() {
     if (!searchInput) delete filteredParams.keyword;
     if (tags.length === 0) delete filteredParams.tags;
 
-    navigate({ pathname: "/posts", search: '?' + new URLSearchParams(filteredParams).toString() });
+    navigate({ pathname: "/posts", search: '?' + new URLSearchParams(filteredParams as any).toString() });
   }, [tags, params, navigate, searchInput]);
 
   return (

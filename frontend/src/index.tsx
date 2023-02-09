@@ -11,7 +11,15 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            retry: false
+        }
+    }
+});
 
 const root = ReactDOM.createRoot((document as any).getElementById('root'));
 root.render((
