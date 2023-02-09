@@ -1,6 +1,9 @@
 .vscode
 
-frontend/node_modules
+nextjs-practice/.env.local
+nextjs-practice/node_modules
+nextjs-practice/.next
+nextjs-practice/.vscode
 
 backend/.env
 backend/node_modules
